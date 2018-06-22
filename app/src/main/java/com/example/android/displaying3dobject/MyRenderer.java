@@ -83,20 +83,20 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
 
 
-//        Matrix.setRotateM(mRotationMatrix, 0, angle, 1f, 0f, 0f);
+        Matrix.setRotateM(mRotationMatrix, 0, 90, 0f, 0f, -1.0f);
 //        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 1f, 0f);
 //        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1f);
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-//        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 //        mTriangle.draw(mMVPMatrix);
 
 //        mSquare.draw(mMVPMatrix);
 
 //        mCube.draw(mMVPMatrix);
 
-        mSprite.Draw(mMVPMatrix);
+        mSprite.Draw(scratch);
     }
 
     public static int loadShader(int type, String shaderCode) {
