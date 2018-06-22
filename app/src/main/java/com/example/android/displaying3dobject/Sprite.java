@@ -59,10 +59,10 @@ public class Sprite {
     };
 
     final float[] cubeTextureCoordinateData = {
-            0.0f,  0.0f,
-            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f,
             1.0f, 1.0f,
-            0.0f,  1.0f
+            1.0f, 0.0f
     };
 
 
@@ -128,7 +128,6 @@ public class Sprite {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
 
-
         //Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT,
                 false, vertexStride, mVertexBuffer);
@@ -165,6 +164,8 @@ public class Sprite {
         //Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
+//        GLES20.glEnable(GLES20.GL_BLEND);
+//        GLES20.glBlendFunc(GLES20.GL_SRC_COLOR,GLES20.GL_DST_ALPHA);
         //Draw the triangle
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length, GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 

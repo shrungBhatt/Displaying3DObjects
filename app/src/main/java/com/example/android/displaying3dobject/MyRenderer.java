@@ -83,7 +83,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
 
 
-        Matrix.setRotateM(mRotationMatrix, 0, 90, 0f, 0f, -1.0f);
+        Matrix.setRotateM(mRotationMatrix, 0, 0, 0f, 0f, -1.0f);
 //        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 1f, 0f);
 //        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1f);
         // Combine the rotation matrix with the projection and camera view
