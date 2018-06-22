@@ -92,7 +92,7 @@ public class Sprite {
 
         GLES20.glLinkProgram(mProgram);
 
-        mTextureHandle = loadTexture(mContext, R.drawable.android);
+        mTextureHandle = loadTexture(mContext, R.drawable.generator);
 
         mCubeTextureCoordinates = ByteBuffer.allocateDirect(cubeTextureCoordinateData.length * 4).
                 order(ByteOrder.nativeOrder()).asFloatBuffer();
