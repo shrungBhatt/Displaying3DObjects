@@ -9,6 +9,9 @@ import android.os.SystemClock;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.setLookAtM;
+
 public class MyRenderer implements GLSurfaceView.Renderer {
 
 
@@ -27,7 +30,8 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private float[] mRotationMatrix = new float[16];
+    private final float[] mViewProjectionMatrix = new float[16];
+    private float[] mModelMatrix = new float[16];
 
 
     public volatile float mAngle;
@@ -60,7 +64,14 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+
+        MatrixHelper.perspectiveM(mProjectionMatrix, 45,
+                (float) width / (float) height, 1f, 10f);
+
+        setLookAtM(mViewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f,
+                0f, 1f, 0f);
+
     }
 
     @Override
@@ -75,28 +86,28 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
 //         Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+//        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+//        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
+
+        multiplyMM(mViewProjectionMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
 
 
-
-        Matrix.setRotateM(mRotationMatrix, 0, 0, 0f, 0f, -1.0f);
-//        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 1f, 0f);
-//        Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, 1f);
+        Matrix.setRotateM(mModelMatrix, 0, -60, 0f, 0f, -1.0f);
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewProjectionMatrix, 0, mModelMatrix, 0);
 //        mTriangle.draw(mMVPMatrix);
 
 //        mSquare.draw(mMVPMatrix);
 
-//        mCube.draw(mMVPMatrix);
+        mCube.draw(mMVPMatrix);
 
-        mSprite.Draw(scratch);
+//        mSprite.Draw(scratch);
     }
 
     public static int loadShader(int type, String shaderCode) {
