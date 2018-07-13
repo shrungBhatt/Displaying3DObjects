@@ -34,6 +34,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private Cube mCube;
     private Sprite mSprite;
     private Torus mTorus;
+    private Cube3 mCube3;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -62,27 +63,13 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         mCube = new Cube(mContext);
         mSprite = new Sprite(mContext);
         mTorus = new Torus(mContext);
+        mCube3 = new Cube3(mContext);
 
         reset();
 
     }
 
-    private void reset(){
 
-        glEnable(GL10.GL_DEPTH_TEST);
-        glClearDepthf(1.0f);
-        glDepthFunc(GL10.GL_LESS);
-        glDepthRangef(0, 1f);
-        glDepthMask(true);
-
-        glEnable(GLES20.GL_BLEND);
-        glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
-        glFrontFace(GLES20.GL_CCW);
-        glCullFace(GLES20.GL_BACK);
-        glEnable(GLES20.GL_CULL_FACE);
-
-    }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
@@ -116,7 +103,8 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
 
 
-        Matrix.setRotateM(mModelMatrix, 0, angle, 1f, 0f, 0f);
+        Matrix.setRotateM(mModelMatrix, 0, angle, 1f, 1f, 1f);
+        Matrix.scaleM(mModelMatrix,0,0.6f,0.6f,0.6f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
@@ -126,8 +114,9 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
 //        mCube.draw(mMVPMatrix);
 
-        mTorus.draw(mMVPMatrix);
+//        mTorus.draw(mMVPMatrix);
 
+        mCube3.draw(mMVPMatrix);
     }
 
     public static int loadShader(int type, String shaderCode) {
@@ -141,5 +130,23 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         GLES20.glCompileShader(shader);
 
         return shader;
+    }
+
+    //These is to give initial settings to opengl.
+    private void reset(){
+
+        glEnable(GL10.GL_DEPTH_TEST);
+        glClearDepthf(1.0f);
+        glDepthFunc(GL10.GL_LESS);
+        glDepthRangef(0, 1f);
+        glDepthMask(true);
+
+        glEnable(GLES20.GL_BLEND);
+        glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        glFrontFace(GLES20.GL_CCW);
+        glCullFace(GLES20.GL_BACK);
+        glEnable(GLES20.GL_CULL_FACE);
+
     }
 }
