@@ -9,6 +9,14 @@ import android.os.SystemClock;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.GLES20.glBlendFunc;
+import static android.opengl.GLES20.glClearDepthf;
+import static android.opengl.GLES20.glCullFace;
+import static android.opengl.GLES20.glDepthFunc;
+import static android.opengl.GLES20.glDepthMask;
+import static android.opengl.GLES20.glDepthRangef;
+import static android.opengl.GLES20.glEnable;
+import static android.opengl.GLES20.glFrontFace;
 import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.setLookAtM;
 
@@ -25,6 +33,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private Square mSquare;
     private Cube mCube;
     private Sprite mSprite;
+    private Torus mTorus;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -50,8 +59,28 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         mTriangle = new Triangle();
         mSquare = new Square();
-        mCube = new Cube();
+        mCube = new Cube(mContext);
         mSprite = new Sprite(mContext);
+        mTorus = new Torus(mContext);
+
+        reset();
+
+    }
+
+    private void reset(){
+
+        glEnable(GL10.GL_DEPTH_TEST);
+        glClearDepthf(1.0f);
+        glDepthFunc(GL10.GL_LESS);
+        glDepthRangef(0, 1f);
+        glDepthMask(true);
+
+        glEnable(GLES20.GL_BLEND);
+        glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        glFrontFace(GLES20.GL_CCW);
+        glCullFace(GLES20.GL_BACK);
+        glEnable(GLES20.GL_CULL_FACE);
 
     }
 
@@ -60,11 +89,9 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glViewport(0, 0, width, height);
 
-        float ratio = (float) width / height;
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
         MatrixHelper.perspectiveM(mProjectionMatrix, 45,
                 (float) width / (float) height, 1f, 10f);
@@ -76,38 +103,31 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        float[] scratch = new float[16];
 
         // Create a rotation transformation for the triangle
         long time = SystemClock.uptimeMillis() % 4000L;
         float angle = 0.090f * ((int) time);
 
 
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
-//         Set the camera position (View matrix)
-//        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-        // Calculate the projection and view transformation
-//        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
 
         multiplyMM(mViewProjectionMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
 
 
-        Matrix.setRotateM(mModelMatrix, 0, -60, 0f, 0f, -1.0f);
+        Matrix.setRotateM(mModelMatrix, 0, angle, 1f, 0f, 0f);
+
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(mMVPMatrix, 0, mViewProjectionMatrix, 0, mModelMatrix, 0);
-//        mTriangle.draw(mMVPMatrix);
 
-//        mSquare.draw(mMVPMatrix);
 
-        mCube.draw(mMVPMatrix);
+//        mCube.draw(mMVPMatrix);
 
-//        mSprite.Draw(scratch);
+        mTorus.draw(mMVPMatrix);
+
     }
 
     public static int loadShader(int type, String shaderCode) {

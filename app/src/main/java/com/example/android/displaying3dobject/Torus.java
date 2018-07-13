@@ -11,15 +11,43 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import javax.microedition.khronos.opengles.GL10;
 
-import static android.opengl.GLES20.*;
+import min3d.Shared;
+import min3d.core.FacesBufferedList;
+import min3d.core.Object3d;
+import min3d.core.Object3dContainer;
+import min3d.parser.IParser;
+import min3d.parser.Parser;
 
-public class Cube {
+import static android.opengl.GLES20.GL_FLOAT;
+import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
+import static android.opengl.GLES20.GL_TRIANGLES;
+import static android.opengl.GLES20.GL_UNSIGNED_SHORT;
+import static android.opengl.GLES20.GL_VERTEX_SHADER;
+import static android.opengl.GLES20.glAttachShader;
+import static android.opengl.GLES20.glBlendFunc;
+import static android.opengl.GLES20.glCreateProgram;
+import static android.opengl.GLES20.glCullFace;
+import static android.opengl.GLES20.glDisableVertexAttribArray;
+import static android.opengl.GLES20.glDrawElements;
+import static android.opengl.GLES20.glEnable;
+import static android.opengl.GLES20.glEnableVertexAttribArray;
+import static android.opengl.GLES20.glFrontFace;
+import static android.opengl.GLES20.glGetAttribLocation;
+import static android.opengl.GLES20.glGetUniformLocation;
+import static android.opengl.GLES20.glLinkProgram;
+import static android.opengl.GLES20.glUniformMatrix4fv;
+import static android.opengl.GLES20.glUseProgram;
+import static android.opengl.GLES20.glVertexAttribPointer;
 
-    private final FloatBuffer mCubeTextureCoordinates;
-    private FloatBuffer vertexBuffer;
-    private ShortBuffer drawListBuffer;
+public class Torus {
+
+    private final FloatBuffer textureVerticesBuffer;
+    private final FloatBuffer vertexBuffer;
+    private final ShortBuffer drawListBuffer;
     private final int mProgram;
+    private final Context mContext;
 
     private int mMVPMatrixHandle;
 
@@ -30,6 +58,8 @@ public class Cube {
     private final int mTextureCoordinateDataSize = 2;
 
 
+
+    int pos, len;
 
 
     float color[] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -69,63 +99,15 @@ public class Cube {
     static final int COORDS_PER_VERTEX = 3;
 
 
-    static float squareCoords[] = {
-            0.462329f, -0.462329f, -0.462329f,
-            0.462329f, -0.462329f, 0.462329f,
-            -0.462329f, -0.462329f, 0.462329f,
-            -0.462329f, -0.462329f, -0.462330f,
-            0.462330f, 0.462329f, -0.462329f,
-            0.462329f, 0.462329f, 0.462330f,
-            -0.462330f, 0.462329f, 0.462329f,
-            -0.462329f, 0.462329f, -0.462329f
-    };
 
-    private short drawOrder[] = {
-            1,3,0,
-            7,6,4,
-            4,1,0,
-            5,2,1,
-            2,7,3,
-            0,7,4,
-            1,2,3,
-            7,6,5,
-            4,5,1,
-            5,6,2,
-            2,6,7,
-            0,3,7
-    }; // order to draw vertices
 
-    final float[] cubeTextureCoordinateData = {
-            0.250280f, 0.333247f,
-            0.502659f, 0.004190f,
-            0.502659f, 0.331195f,
-            0.247697f, 0.990145f,
-            0.496003f, 0.666876f,
-            0.495436f, 0.990144f,
-            0.499570f, 0.655298f,
-            0.250280f, 0.332395f,
-            0.499570f, 0.336497f,
-            0.242922f, 0.664524f,
-            0.000087f, 0.332220f,
-            0.242922f, 0.335476f,
-            0.750272f, 0.667780f,
-            0.993107f, 0.332220f,
-            0.995559f, 0.661268f,
-            0.749175f, 0.666759f,
-            0.500473f, 0.332395f,
-            0.749763f, 0.334087f,
-            0.250280f, 0.002138f,
-            0.248923f, 0.670866f,
-            0.247191f, 0.663503f,
-            0.002538f, 0.664524f,
-            0.747820f, 0.335476f,
-            0.501699f, 0.665913f
-    };
+//    private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
+//    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    public Torus(Context context) {
 
-    public Cube(Context context) {
+        mContext = context;
+        Shared.context(context);
 
         int vertexShader = MyRenderer.loadShader(GL_VERTEX_SHADER,
                 vertexShaderCode);
@@ -147,30 +129,36 @@ public class Cube {
         // creates OpenGL ES program executables
         glLinkProgram(mProgram);
 
-        mTextureHandle = loadTexture(context, R.drawable.images);
+        mTextureHandle = loadTexture(context, R.drawable.torus);
 
+        Object3d object3d = getObeject3d();
 
-        // initialize vertex byte buffer for shape coordinates
-        ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (# of coordinate values * 4 bytes per float)
-                squareCoords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(squareCoords);
+        vertexBuffer = object3d.vertices().points().buffer();
         vertexBuffer.position(0);
 
-        // initialize byte buffer for the draw list
-        ByteBuffer dlb = ByteBuffer.allocateDirect(
-                // (# of coordinate values * 2 bytes per short)
-                drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
+        if (!object3d.faces().renderSubsetEnabled()) {
+            pos = 0;
+            len = object3d.faces().size();
+        } else {
+            pos = object3d.faces().renderSubsetStartIndex() * FacesBufferedList.PROPERTIES_PER_ELEMENT;
+            len = object3d.faces().renderSubsetLength();
+        }
 
-        mCubeTextureCoordinates = ByteBuffer.allocateDirect(cubeTextureCoordinateData.length * 4).
-                order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mCubeTextureCoordinates.put(cubeTextureCoordinateData).position(0);
+        drawListBuffer = object3d.faces().buffer();
+        drawListBuffer.position(pos);
+
+        textureVerticesBuffer = object3d.vertices().uvs().buffer();
+        textureVerticesBuffer.position(0);
+
+    }
+
+    private Object3d getObeject3d(){
+        IParser myParser = Parser.createParser(Parser.Type.OBJ, mContext.getResources(),
+                "com.example.android.displaying3dobject:raw/torus_obj", false);
+        myParser.parse();
+        Object3dContainer faceObject3D = myParser.getParsedObject();
+
+        return faceObject3D.getChildAt(0);
     }
 
 
@@ -206,9 +194,8 @@ public class Cube {
         GLES20.glUniform1i(mTextureUniformHandle, 0);
 
         //Pass in the texture coordinate information
-        mCubeTextureCoordinates.position(0);
         GLES20.glVertexAttribPointer(mTextureCoordinateHandle, mTextureCoordinateDataSize, GLES20.GL_FLOAT,
-                false, 8, mCubeTextureCoordinates);
+                false, 0, textureVerticesBuffer);
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
 
         // get handle to shape's transformation matrix
@@ -218,11 +205,11 @@ public class Cube {
         glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
 
-//         Draw the triangle
-        glDrawElements(GL_TRIANGLES, drawOrder.length,
-                GL_UNSIGNED_SHORT, drawListBuffer);
-//        colorTheCube(mColorHandle);
 
+
+//         Draw the triangle
+        glDrawElements(GL_TRIANGLES,len * FacesBufferedList.PROPERTIES_PER_ELEMENT,
+                GL_UNSIGNED_SHORT,drawListBuffer);
 
         // Disable vertex array
         glDisableVertexAttribArray(mPositionHandle);
@@ -245,7 +232,7 @@ public class Cube {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
 
             // Set filtering
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
             // Load the bitmap into the bound texture.
