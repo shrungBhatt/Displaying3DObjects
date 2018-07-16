@@ -121,7 +121,7 @@ public class Cube3 {
         // creates OpenGL ES program executables
         glLinkProgram(mProgram);
 
-        mTextureHandle = loadTexture(context, R.drawable.images);
+        mTextureHandle = loadTexture(context, R.drawable.merge_from_ofoct);
 
         Object3d object3d = getObeject3d();
 
@@ -146,7 +146,7 @@ public class Cube3 {
 
     private Object3d getObeject3d(){
         IParser myParser = Parser.createParser(Parser.Type.OBJ, mContext.getResources(),
-                "com.example.android.displaying3dobject:raw/cube3_obj", false);
+                "com.example.android.displaying3dobject:raw/brakes_obj", false);
         myParser.parse();
         Object3dContainer faceObject3D = myParser.getParsedObject();
 
@@ -172,7 +172,7 @@ public class Cube3 {
 
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
-        mTextureUniformHandle = GLES20.glGetAttribLocation(mProgram, "u_Texture");
+        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
         mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "a_TexCoordinate");
 
 
