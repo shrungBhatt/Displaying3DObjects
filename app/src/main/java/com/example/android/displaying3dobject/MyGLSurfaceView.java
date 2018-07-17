@@ -12,48 +12,45 @@ public class MyGLSurfaceView extends GLSurfaceView {
     private float mPreviousX;
     private float mPreviousY;
 
-    public MyGLSurfaceView(Context context) {
+    private float mDensity;
+
+    public MyGLSurfaceView(Context context,float density) {
         super(context);
 
         setEGLContextClientVersion(2);
 
         mMyRenderer = new MyRenderer(context);
 
+        mDensity = density;
+
         setRenderer(mMyRenderer);
-//        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
 
     }
 
-/*    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        float x = e.getX();
-        float y = e.getY();
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event != null) {
+            float x = event.getX();
+            float y = event.getY();
 
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
+            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                if (mMyRenderer != null) {
+                    float deltaX = (x - mPreviousX) / mDensity / 2f;
+                    float deltaY = (y - mPreviousY) / mDensity / 2f;
 
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
-
-                // reverse direction of rotation above the mid-line
-                if (y > getHeight() / 2) {
-                    dx = dx * -1 ;
+                    mMyRenderer.mDeltaX += deltaX;
+                    mMyRenderer.mDeltaY += deltaY;
                 }
+            }
 
-                // reverse direction of rotation to left of the mid-line
-                if (x < getWidth() / 2) {
-                    dy = dy * -1 ;
-                }
+            mPreviousX = x;
+            mPreviousY = y;
 
-                mMyRenderer.setAngle(
-                        mMyRenderer.getAngle() +
-                                ((dx + dy) * TOUCH_SCALE_FACTOR));
-                requestRender();
+            return true;
+        } else {
+            return super.onTouchEvent(event);
         }
+    }
 
-        mPreviousX = x;
-        mPreviousY = y;
-        return true;
-    }*/
 }

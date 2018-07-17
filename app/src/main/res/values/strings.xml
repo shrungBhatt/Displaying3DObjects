@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Displaying3DObject</string>
+
+    <string name="zoom_in">Zoom In</string>
+    <string name="zoom_out">Zoom Out</string>
+    <string name="menu_friction">Friction</string>
 </resources>

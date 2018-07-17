@@ -42,6 +42,12 @@ public class MyRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mViewProjectionMatrix = new float[16];
     private float[] mModelMatrix = new float[16];
+    private final float[] mAccumulatedRotation = new float[16];
+    private final float[] mCurrentRotation = new float[16];
+    private float[] mTemporaryMatrix = new float[16];
+
+    public volatile float mDeltaX;
+    public volatile float mDeltaY;
 
 
     public volatile float mAngle;
@@ -66,6 +72,9 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         mCube3 = new Cube3(mContext);
 
         reset();
+
+        Matrix.setIdentityM(mAccumulatedRotation, 0);
+
 
     }
 
@@ -103,8 +112,26 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
 
 
-        Matrix.setRotateM(mModelMatrix, 0, angle, 1f, 1f, 1f);
+
+        Matrix.setIdentityM(mModelMatrix,0);
+//        Matrix.setRotateM(mModelMatrix, 0, getAngle(), 0f, 1f, 0f);
         Matrix.scaleM(mModelMatrix,0,0.6f,0.6f,0.6f);
+
+        // Set a matrix that contains the current rotation.
+        Matrix.setIdentityM(mCurrentRotation, 0);
+        Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
+        Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
+        mDeltaX = 0.0f;
+        mDeltaY = 0.0f;
+
+        // Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
+        Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
+        System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
+
+        // Rotate the cube taking the overall rotation into account.
+        Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
+        System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);
+
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
