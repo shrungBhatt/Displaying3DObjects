@@ -105,7 +105,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
         float angle = 0.090f * ((int) time);
 
 
-        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 
         multiplyMM(mViewProjectionMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -115,7 +115,7 @@ public class MyRenderer implements GLSurfaceView.Renderer {
 
         Matrix.setIdentityM(mModelMatrix,0);
 //        Matrix.setRotateM(mModelMatrix, 0, getAngle(), 0f, 1f, 0f);
-        Matrix.scaleM(mModelMatrix,0,0.6f,0.6f,0.6f);
+        Matrix.scaleM(mModelMatrix,0,0.3f,0.3f,0.3f);
 
         // Set a matrix that contains the current rotation.
         Matrix.setIdentityM(mCurrentRotation, 0);

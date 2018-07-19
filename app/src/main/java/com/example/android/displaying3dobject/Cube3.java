@@ -121,7 +121,7 @@ public class Cube3 {
         // creates OpenGL ES program executables
         glLinkProgram(mProgram);
 
-        mTextureHandle = loadTexture(context, R.drawable.merge_from_ofoct);
+        mTextureHandle = loadTexture(context, R.drawable.engine_texture);
 
         Object3d object3d = getObeject3d();
 
@@ -146,7 +146,7 @@ public class Cube3 {
 
     private Object3d getObeject3d(){
         IParser myParser = Parser.createParser(Parser.Type.OBJ, mContext.getResources(),
-                "com.example.android.displaying3dobject:raw/brakes_obj", false);
+                "com.example.android.displaying3dobject:raw/smpngn_obj", false);
         myParser.parse();
         Object3dContainer faceObject3D = myParser.getParsedObject();
 
